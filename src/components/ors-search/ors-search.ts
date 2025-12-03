@@ -1,16 +1,19 @@
 import "@vaadin/icon";
 import "@vaadin/icons";
+import "@vaadin/item";
+import "@vaadin/list-box";
 import "@vaadin/tabs";
 import "@vaadin/tabsheet";
 import "@vaadin/text-field";
-import "@vaadin/list-box";
-import "@vaadin/item";
+import { LatLng } from "leaflet";
 import { LitElement, css, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { OrsApi } from "../../ors-api/ors-api";
 
 @customElement("ors-search")
 export class OrsSearchTab extends LitElement {
+  @property({ type: Object }) map?: L.Map;
+
   @property({ type: String }) searchTerm = "";
   @property({ type: String }) id: string = "";
   @property({ type: String }) label: string = "Wpisz adres:";
@@ -37,17 +40,36 @@ export class OrsSearchTab extends LitElement {
             clearInterval(this.inputTimeout);
           }
 
+          if (searchTerm.trim().length === 0) {
+            this.searchTerm = "";
+            this.suggestions = [];
+            return;
+          }
+
+          if (this.searchTerm === searchTerm) return;
+
           this.inputTimeout = setTimeout(async () => {
-            const suggestions = await this.orsApi.geocode(searchTerm);
+            const coords: LatLng | undefined = this.map?.getCenter();
+            const suggestions = await this.orsApi.geocode(searchTerm, coords);
             console.log(suggestions);
             this.suggestions = suggestions;
-          }, 500);
+          }, 1000);
         }}
       ></vaadin-text-field>
       <vaadin-list-box ?hidden=${!(this.suggestions.length > 0)}>
         ${this.suggestions.map(
           (suggestion) =>
-            html`<vaadin-item>${suggestion.properties.label}</vaadin-item>`
+            html`<vaadin-item
+              @click=${() => {
+                console.log(suggestion);
+                this.searchTerm = suggestion.properties.label;
+                this.suggestions = [];
+                const coords = suggestion.geometry.coordinates;
+
+                this.map?.panTo(new LatLng(coords[1], coords[0]));
+              }}
+              >${suggestion.properties.label}</vaadin-item
+            >`
         )}
       </vaadin-list-box>
     `;
@@ -58,7 +80,7 @@ export class OrsSearchTab extends LitElement {
       width: 100%;
     }
     vaadin-list-box {
-      max-width: 250px;
+      width: 92%;
       overflow-y: auto;
       border: 1px;
       background-color: white;

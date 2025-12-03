@@ -4,12 +4,14 @@ import "@vaadin/tabs";
 import "@vaadin/tabsheet";
 import "@vaadin/text-field";
 import { LitElement, css, html } from "lit";
-import { customElement } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 import "../ors-search"
 
 
 @customElement("ors-panel")
 export class OrsPanel extends LitElement {
+     @property({ type: Object }) map?: L.Map;
+     
     render() {
        return html`<h4>Open Route Service - sample</h4>
        <vaadin-tabsheet>
@@ -18,7 +20,7 @@ export class OrsPanel extends LitElement {
             <vaadin-tab id="route-tab">Trasa</vaadin-tab>
             <vaadin-tab id="reach-tab">Izochrony</vaadin-tab>
         </vaadin-tabs>
-        <div tab="search-tab"><ors-search></ors-search></div>  
+        <div tab="search-tab"><ors-search .map=${this.map}></ors-search></div>  
         <div tab="route-tab">Wyznacz trasę</div>  
         <div tab="reach-tab">Wygeneruj izochorny</div>  
        </vaadin-tabsheet>
@@ -42,5 +44,7 @@ export class OrsPanel extends LitElement {
         h4 {
             text-align:center;
         }
+        vaadin-tabsheet {
+            height: 90%;  }
     `
 }

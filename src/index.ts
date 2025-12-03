@@ -8,6 +8,6 @@ import "./components/ors-panel"
 @customElement("ors-renderer") 
 export class OrsRenderer extends OrsMap {
     render() {
-       return html`<ors-panel></ors-panel>`
+       return html`<ors-panel .map=${this.map}></ors-panel>`
     }
 }
