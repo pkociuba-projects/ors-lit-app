@@ -19,10 +19,12 @@ export class OrsSearchTab extends LitElement {
   @property({ type: String }) label: string = "Wpisz adres:";
   @property({ type: String }) placeholder: string =
     "Konstantynów 1A-1E, Lublin,LU,Polska";
+  @property({type:String}) type: string = "";
 
   @state() orsApi: OrsApi = new OrsApi();
   @state() suggestions: any[] = [];
   @state() inputTimeout: number | null = null;
+
 
   render() {
     return html`
@@ -66,7 +68,21 @@ export class OrsSearchTab extends LitElement {
                 this.suggestions = [];
                 const coords = suggestion.geometry.coordinates;
 
-                this.map?.panTo(new LatLng(coords[1], coords[0]));
+                this.map?.panTo(new LatLng(coords[1], coords[0]), {
+                   animate:true,
+                   duration:1,
+                   easeLinearity:0.1
+                });
+                this.dispatchEvent(new CustomEvent("add-marker-geocode",{
+                  detail: {
+                    coords,
+                    type:this.type,
+                    label: suggestion.properties.label
+                  },
+                  bubbles: true,
+                  composed: true
+                }))
+
               }}
               >${suggestion.properties.label}</vaadin-item
             >`

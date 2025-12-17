@@ -8,6 +8,8 @@ import "./components/ors-panel"
 @customElement("ors-renderer") 
 export class OrsRenderer extends OrsMap {
     render() {
-       return html`<ors-panel .map=${this.map}></ors-panel>`
+       return html`<ors-panel .map=${this.map} @tab-index-changed=${(e:CustomEvent)=> {
+        this.currentTabIdx = e.detail.idx
+       }}></ors-panel>`
     }
 }
