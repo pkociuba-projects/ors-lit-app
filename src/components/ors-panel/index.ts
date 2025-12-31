@@ -1,2 +1,1 @@
-import { OrsPanel } from "./ors-panel";
-export {OrsPanel}
+import './ors-panel'

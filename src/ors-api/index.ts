@@ -1,1 +1,1 @@
-import "./ors-api"
+import './ors-api'

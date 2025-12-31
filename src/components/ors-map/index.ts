@@ -1,2 +1,4 @@
-import { OrsMap } from "./ors-map";
-export { OrsMap };
+import './ors-map'
+import { OrsMap } from './ors-map'
+
+export { OrsMap }

@@ -1,104 +1,107 @@
 import "@vaadin/icon";
 import "@vaadin/icons";
-import "@vaadin/item";
-import "@vaadin/list-box";
-import "@vaadin/tabs";
-import "@vaadin/tabsheet";
 import "@vaadin/text-field";
-import { LatLng } from "leaflet";
+import "@vaadin/tabsheet";
+import "@vaadin/tabs";
+import "@vaadin/list-box";
+import "@vaadin/item";
+import L from "leaflet";
 import { LitElement, css, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { OrsApi } from "../../ors-api/ors-api";
 
 @customElement("ors-search")
 export class OrsSearchTab extends LitElement {
-  @property({ type: Object }) map?: L.Map;
-
   @property({ type: String }) searchTerm = "";
-  @property({ type: String }) id: string = "";
-  @property({ type: String }) label: string = "Wpisz adres:";
-  @property({ type: String }) placeholder: string =
-    "Konstantynów 1A-1E, Lublin,LU,Polska";
-  @property({type:String}) type: string = "";
-
+  @property({type: String }) id: string = ""
+  @property({type: String}) label: string = "Wpisz adres:"
+  @property({type: String}) placeholder: string = "Konstantynów 1A-1E, Lublin,LU,Polska"
+  @property({ type: Array }) suggestions: any[] = [];
+  @property({type: String}) type: string = ""
   @state() orsApi: OrsApi = new OrsApi();
-  @state() suggestions: any[] = [];
   @state() inputTimeout: number | null = null;
 
+  firstUpdated(props: any) {
+    super.firstUpdated(props);
+  }
+
+  handleSuggestionClick(suggestion: string) {
+    this.searchTerm = suggestion;
+    this.suggestions = []; // Clear suggestions after selecting one
+  }
 
   render() {
-    return html`
-      <vaadin-text-field
+    return html`<vaadin-text-field
         id=${this.id}
         theme="small"
         clear-button-visible
         placeholder=${this.placeholder}
         label=${this.label}
         value=${this.searchTerm}
-        @value-changed=${(e: CustomEvent) => {
-          const searchTerm: string = e.detail.value;
-
-          if (this.inputTimeout) {
-            clearInterval(this.inputTimeout);
-          }
-
-          if (searchTerm.trim().length === 0) {
+        @value-changed=${(e) => {
+          const searchTerm = e.detail.value;
+          
+          if(searchTerm === "") {
             this.searchTerm = "";
-            this.suggestions = [];
-            return;
+            this.dispatchEvent(new CustomEvent("hide-marker", { detail: { type: this.type }, bubbles: true, composed: true }))
           }
 
           if (this.searchTerm === searchTerm) return;
 
+          if (this.inputTimeout) {
+            clearTimeout(this.inputTimeout);
+          }
+          if (searchTerm === "") {
+            this.suggestions = [];
+            return;
+          }
           this.inputTimeout = setTimeout(async () => {
-            const coords: LatLng | undefined = this.map?.getCenter();
-            const suggestions = await this.orsApi.geocode(searchTerm, coords);
-            console.log(suggestions);
+            const suggestions = await this.orsApi.geocode(searchTerm);
             this.suggestions = suggestions;
-          }, 1000);
+          }, 500);
         }}
-      ></vaadin-text-field>
+      >
+        <vaadin-icon
+          icon="vaadin:search"
+          slot="suffix"
+          @click=${(e) => {
+            console.log("klik");
+          }}
+        ></vaadin-icon>
+      </vaadin-text-field>
       <vaadin-list-box ?hidden=${!(this.suggestions.length > 0)}>
         ${this.suggestions.map(
           (suggestion) =>
             html`<vaadin-item
               @click=${() => {
-                console.log(suggestion);
-                this.searchTerm = suggestion.properties.label;
-                this.suggestions = [];
-                const coords = suggestion.geometry.coordinates;
-
-                this.map?.panTo(new LatLng(coords[1], coords[0]), {
-                   animate:true,
-                   duration:1,
-                   easeLinearity:0.1
-                });
-                this.dispatchEvent(new CustomEvent("add-marker-geocode",{
+                this.handleSuggestionClick(suggestion.properties.label);
+                this.dispatchEvent(new CustomEvent("add-marker-geocode", {
                   detail: {
-                    coords,
-                    type:this.type,
-                    label: suggestion.properties.label
+                    coords: suggestion.geometry.coordinates,
+                    type: this.type,
+                    label: suggestion.properties.label,
                   },
                   bubbles: true,
-                  composed: true
-                }))
-
+                  composed: true,
+                }));
               }}
               >${suggestion.properties.label}</vaadin-item
             >`
         )}
-      </vaadin-list-box>
-    `;
+      </vaadin-list-box> `;
   }
 
   static styles? = css`
     vaadin-text-field {
       width: 100%;
     }
+
     vaadin-list-box {
-      width: 92%;
+      max-height: 250px;
       overflow-y: auto;
-      border: 1px;
+      border: 1px solid #ccc;
+      /* position: absolute;
+      top:10; */
       background-color: white;
       z-index: 1;
       position: absolute;
@@ -106,6 +109,7 @@ export class OrsSearchTab extends LitElement {
     }
 
     vaadin-item {
+      /* padding: 8px; */
       cursor: pointer;
     }
 

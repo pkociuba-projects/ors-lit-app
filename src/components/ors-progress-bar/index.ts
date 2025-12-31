@@ -1,1 +1,1 @@
-import "./ors-progress-bar"
+import './ors-progress-bar'

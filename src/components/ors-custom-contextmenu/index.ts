@@ -1,1 +1,1 @@
-import "./ors-custom-contextmenu"
+import './ors-custom-contextmenu'

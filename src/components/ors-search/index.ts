@@ -1,1 +1,1 @@
-import "./ors-search"
+import './ors-search'
