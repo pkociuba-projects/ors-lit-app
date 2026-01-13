@@ -91,7 +91,7 @@ export class OrsMap extends LitElement {
 
   // connectionError: NotificationLitRenderer = (error) => ;
 
-  renderConnectionNotification = (error) => {
+  renderConnectionNotification = (error:any) => {
     render(
       html`<vaadin-notification
         class="notification"
@@ -114,7 +114,7 @@ export class OrsMap extends LitElement {
     );
   };
 
-  routeService = async (type?): Promise<void> => {
+  routeService = async (type?: any): Promise<void> => {
     if (
       this.markerGreen!.options.opacity === 1 &&
       this.markerRed!.options.opacity === 1

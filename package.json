@@ -18,6 +18,8 @@
     "leaflet": "^1.9.4",
     "lit": "^3.3.1",
     "typescript": "^5.9.3",
-    "vite": "^6.4.1"
+    "vite": "^6.4.1",
+    "i18next": "^23.0.1",
+    "i18next-http-backend": "^2.2.2"
   }
 }

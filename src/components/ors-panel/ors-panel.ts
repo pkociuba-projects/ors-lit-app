@@ -5,9 +5,12 @@ import "@vaadin/tabsheet";
 import "@vaadin/tabs";
 import L from "leaflet";
 import { LitElement, css, html } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import "../ors-search"
-import "../ors-route-tab"
+import { customElement, property, state } from "lit/decorators.js";
+import "../ors-search";
+import "../ors-route-tab";
+import "../ors-place-details";
+
+import { i18n } from "../../i18n";
 
 @customElement("ors-panel")
 export class OrsPanel extends LitElement {
@@ -16,9 +19,19 @@ export class OrsPanel extends LitElement {
   @property({ type: String }) routeStopLabel: string = "";
   @property({ type: String }) searchLabel: string = "";
   @property({ type: Number }) currentTabIdx: number = 0;
+  @state() selectedPlace: any = null;
 
-  firstUpdated(props: any) {
-    super.firstUpdated(props);
+  onPlaceSelected(e: any) {
+    this.selectedPlace = e.detail.feature;
+  }
+  @state() language: string = i18n.language || "pl";
+
+  connectedCallback() {
+    super.connectedCallback();
+    i18n.on("languageChanged", (lng) => {
+      this.language = lng;
+      this.requestUpdate();
+    });
   }
 
   searchTab = () => {
@@ -26,13 +39,13 @@ export class OrsPanel extends LitElement {
     id="searchAddress"
     theme="small"
     clear-button-visible
-    placeholder="Konstantynów 1A-1E, Lublin,LU,Polska"
-    label="Wpisz adres:"
+    placeholder=${i18n.t("search.placeholder")}
+    label=${i18n.t("search.label")}
   >
     <vaadin-icon
       icon="vaadin:search"
       slot="suffix"
-      @click=${(e) => {
+      @click=${(e: any) => {
         console.log("klik");
       }}
     ></vaadin-icon>
@@ -45,11 +58,20 @@ export class OrsPanel extends LitElement {
 
   render() {
     return html`
-      <h4>Open Route Service - sample</h4>
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <h4>${i18n.t("title")}</h4>
+        <div>
+          <label for="lang">${i18n.t("langLabel")}:</label>
+          <select id="lang" @change=${(e:any)=>{ i18n.changeLanguage(e.target.value); }} .value=${this.language}>
+            <option value="pl">PL</option>
+            <option value="en">EN</option>
+          </select>
+        </div>
+      </div>
       <vaadin-tabsheet>
         <vaadin-tabs
           slot="tabs"
-          @selected-changed=${(e) => {
+          @selected-changed=${(e: any) => {
             const { value } = e.detail;
             this.currentTabIdx = value;
             this.dispatchEvent(
@@ -61,15 +83,18 @@ export class OrsPanel extends LitElement {
             );
           }}
         >
-          <vaadin-tab id="find-tab">Wyszukaj</vaadin-tab>
-          <vaadin-tab id="route-tab">Trasa</vaadin-tab>
-          <vaadin-tab id="reach-tab">Izochrony</vaadin-tab>
+          <vaadin-tab id="find-tab">${i18n.t("tabs.search")}</vaadin-tab>
+          <vaadin-tab id="route-tab">${i18n.t("tabs.route")}</vaadin-tab>
+          <vaadin-tab id="reach-tab">${i18n.t("tabs.reach")}</vaadin-tab>
         </vaadin-tabs>
 
-        <div tab="find-tab"><ors-search .type=${"search"} .searchTerm=${this.searchLabel}> </ors-search></div>
+        <div tab="find-tab">
+          <ors-search .type=${"search"} .searchTerm=${this.searchLabel} @place-selected=${(e:any)=>this.onPlaceSelected(e)} @clear-place=${()=>{ this.selectedPlace = null; }}> </ors-search>
+          ${this.selectedPlace ? html`<ors-place-details .feature=${this.selectedPlace} @clear-place=${()=>{ this.selectedPlace = null; }}></ors-place-details>` : ""}
+        </div>
         <div tab="route-tab"><ors-route-tab .routeStartLabel=${this.routeStartLabel}
          routeStopLabel=${this.routeStopLabel} ></ors-route-tab></div>
-        <div tab="reach-tab">Sprawdź dostępność</div>
+        <div tab="reach-tab">${i18n.t("reach.check")}</div>
       </vaadin-tabsheet>
     `;
   }

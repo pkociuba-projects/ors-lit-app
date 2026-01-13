@@ -1,0 +1,30 @@
+{
+  "title": "Open Route Service - przykład",
+  "tabs": {
+    "search": "Wyszukaj",
+    "route": "Trasa",
+    "reach": "Izochrony"
+  },
+  "search": {
+    "label": "Wpisz adres:",
+    "placeholder": "Konstantynów 1A-1E, Lublin, PL"
+  },
+  "route": {
+    "startLabel": "Punkt początkowy:",
+    "stopLabel": "Punkt końcowy:"
+  },
+  "reach": {
+    "check": "Sprawdź dostępność"
+  },
+  "langLabel": "Język",
+  "placeDetails": {
+    "title": "Szczegóły miejsca",
+    "name": "Nazwa:",
+    "country": "Kraj:",
+    "layer": "Warstwa:",
+    "lon": "Lon.:",
+    "lat": "Lat.:",
+    "copyCoords": "Kopiuj współrzędne",
+    "clear": "Wyczyść"
+  }
+}

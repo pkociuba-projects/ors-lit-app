@@ -2,6 +2,7 @@ import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { OrsMap } from "./components/ors-map";
 import "./components/ors-panel";
+import "./i18n";
 
 @customElement("ors-renderer")
 export class OrsRenderer extends OrsMap {

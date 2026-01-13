@@ -6,10 +6,23 @@ import "@vaadin/text-field";
 import { LitElement, css, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
+import { i18n } from "../../i18n";
+
 @customElement("ors-route-tab")
 export class OrsRouteTab extends LitElement {
   @property({ type: String }) routeStartLabel: string = "";
   @property({ type: String }) routeStopLabel: string = "";
+
+  connectedCallback() {
+    super.connectedCallback();
+    // re-render on language changes so i18n.t in render() returns updated strings
+    i18n.on("languageChanged", () => this.requestUpdate());
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    i18n.off("languageChanged", () => this.requestUpdate());
+  }
 
   firstUpdated(props: any) {
     super.firstUpdated(props);
@@ -21,13 +34,13 @@ export class OrsRouteTab extends LitElement {
         id=${"searchRouteStart"}
         .searchTerm=${this.routeStartLabel}
         .type=${"start"}
-        .label=${"Punkt początkowy:"}
+        .label=${i18n.t("route.startLabel")}
       ></ors-search>
       <ors-search
         id=${"searchRouteStop"}
         .searchTerm=${this.routeStopLabel}
         .type=${"end"}
-        .label=${"Punkt końcowy:"}
+        .label=${i18n.t("route.stopLabel")}
       ></ors-search>
     `;
 

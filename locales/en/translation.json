@@ -1,0 +1,30 @@
+{
+  "title": "Open Route Service - sample",
+  "tabs": {
+    "search": "Search",
+    "route": "Route",
+    "reach": "Isochrones"
+  },
+  "search": {
+    "label": "Enter address:",
+    "placeholder": "Konstantynów 1A-1E, Lublin, PL"
+  },
+  "route": {
+    "startLabel": "Start point:",
+    "stopLabel": "End point:"
+  },
+  "reach": {
+    "check": "Check availability"
+  },
+  "langLabel": "Lang",
+  "placeDetails": {
+    "title": "Place details",
+    "name": "Name:",
+    "country": "Country:",
+    "layer": "Layer:",
+    "lon": "Lon.:",
+    "lat": "Lat.:",
+    "copyCoords": "Copy coords",
+    "clear": "Clear"
+  }
+}
