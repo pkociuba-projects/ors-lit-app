@@ -3,8 +3,10 @@ import "@vaadin/icons";
 import "@vaadin/tabs";
 import "@vaadin/tabsheet";
 import "@vaadin/text-field";
+import "../elevation-profile";
 import { LitElement, css, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import type { ElevationPoint, ElevationStats } from "../../types/elevation";
 
 import { i18n } from "../../i18n";
 
@@ -12,6 +14,9 @@ import { i18n } from "../../i18n";
 export class OrsRouteTab extends LitElement {
   @property({ type: String }) routeStartLabel: string = "";
   @property({ type: String }) routeStopLabel: string = "";
+
+@property({ type: Array }) elevationProfile: ElevationPoint[] = [];
+@property({ type: Object }) elevationStats?: ElevationStats;
 
   connectedCallback() {
     super.connectedCallback();
@@ -26,9 +31,12 @@ export class OrsRouteTab extends LitElement {
 
   firstUpdated(props: any) {
     super.firstUpdated(props);
+ 
+    
   }
 
   render() {
+       console.log(this.elevationProfile, this.elevationStats);
     return html`
       <ors-search
         id=${"searchRouteStart"}
@@ -42,40 +50,8 @@ export class OrsRouteTab extends LitElement {
         .type=${"end"}
         .label=${i18n.t("route.stopLabel")}
       ></ors-search>
+      <elevation-profile .profile=${this.elevationProfile} .stats=${this.elevationStats}></elevation-profile>
     `;
-
-    //   `<vaadin-text-field
-    //   id="searchRouteStart"
-    //   theme="small"
-    //   clear-button-visible
-    //   placeholder="Konstantynów 1A-1E, Lublin,LU,Polska"
-    //   label="Punkt początkowy:"
-    //   value=${this.routeStartLabel}
-    // >
-    //   <vaadin-icon
-    //     icon="vaadin:search"
-    //     slot="suffix"
-    //     @click=${(e) => {
-    //       console.log("klik");
-    //     }}
-    //   ></vaadin-icon>
-    // </vaadin-text-field>
-    // <vaadin-text-field
-    //   id="searchRouteStop"
-    //   theme="small"
-    //   clear-button-visible
-    //   placeholder="Konstantynów 1A-1E, Lublin,LU,Polska"
-    //   label="Punkt końcowy:"
-    //   value=${this.routeStopLabel}
-    // >
-    //   <vaadin-icon
-    //     icon="vaadin:search"
-    //     slot="suffix"
-    //     @click=${(e) => {
-    //       console.log("klik");
-    //     }}
-    //   ></vaadin-icon>
-    // </vaadin-text-field>`;
   }
 
   static styles? = css`

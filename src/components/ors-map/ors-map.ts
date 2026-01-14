@@ -6,6 +6,9 @@ import { LitElement, css, html, render } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 // Using native CustomEvent bubbling instead of centralized eventBus
 import { OrsApi } from "../../ors-api/ors-api";
+import type { ElevationPoint, ElevationStats } from "../../types/elevation";
+import { buildElevationProfileFromGeoJson } from "../../utils/elevation-utils";
+import { orsDirectionsJsonToGeoJson } from "../../utils/ors-route-geojson";
 import "../ors-custom-contextmenu";
 import "../ors-progress-bar";
 import markerIconGreen from "./assets/img/marker-icon-green.png";
@@ -13,6 +16,19 @@ import markerIconRed from "./assets/img/marker-icon-red.png";
 
 @customElement("ors-map")
 export class OrsMap extends LitElement {
+  /**
+   * IMPORTANT: never render overlays into document.body (Lit clears the container).
+   * We keep all overlay UI in a dedicated root div.
+   */
+  private getOverlayRoot(): HTMLElement {
+    let el = document.getElementById("overlay-root");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "overlay-root";
+      document.body.appendChild(el);
+    }
+    return el;
+  }
   @state() map?: L.Map;
   @state() contextMenu?: L.Popup;
   @state() markerGreen?: L.Marker = new L.Marker([0, 0], {
@@ -56,6 +72,10 @@ export class OrsMap extends LitElement {
     popupAnchor: [1, -34],
   });
 
+  @state() elevationProfile: ElevationPoint[] = [];
+  // Explicit union so we can clear stats by assigning `undefined` (exactOptionalPropertyTypes)
+  @state() elevationStats: ElevationStats | undefined = undefined;
+
   @state() routeStyle = {
     color: "#ff7800",
     weight: 5,
@@ -85,7 +105,7 @@ export class OrsMap extends LitElement {
         ?opened=${true}
         ${notificationRenderer(this.renderer, [])}
       ></vaadin-notification>`,
-      document.body
+      this.getOverlayRoot()
     );
   };
 
@@ -110,7 +130,7 @@ export class OrsMap extends LitElement {
           `
         )}
       ></vaadin-notification>`,
-      document.body
+      this.getOverlayRoot()
     );
   };
 
@@ -132,8 +152,15 @@ export class OrsMap extends LitElement {
             throw new Error((feature as any).error.message);
           }
 
-          this.routeLayer!.clearLayers().addData(feature as any);
-          render(html``, document.body);
+          // ORS /json response -> GeoJSON for Leaflet
+          const geo = orsDirectionsJsonToGeoJson(feature);
+          this.routeLayer!.clearLayers().addData(geo as any);
+
+          // Elevation/profile from the same response (decodes routes[0].geometry)
+          const elevation = buildElevationProfileFromGeoJson(feature as any);
+          this.elevationProfile = elevation?.profile ?? [];
+          this.elevationStats = elevation?.stats;
+          render(html``, this.getOverlayRoot());
         } catch (e: any) {
           this.renderConnectionNotification(e);
         }
@@ -145,7 +172,7 @@ export class OrsMap extends LitElement {
         this.renderNotification();
       }
     } else {
-      render(html``, document.body);
+      render(html``, this.getOverlayRoot());
     }
   };
 
@@ -209,7 +236,7 @@ export class OrsMap extends LitElement {
 
   _onAddMarker = async (e: Event) => {
     const data = (e as CustomEvent).detail;
-    render(html`<progress-bar-request></progress-bar-request>`, document.body);
+    render(html`<progress-bar-request></progress-bar-request>`, this.getOverlayRoot());
 
     switch (data.type) {
       case "start":

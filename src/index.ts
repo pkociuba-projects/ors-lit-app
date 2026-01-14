@@ -12,6 +12,8 @@ export class OrsRenderer extends OrsMap {
       .routeStartLabel=${this.routeStartLabel}
       .routeStopLabel=${this.routeStopLabel}
       .searchLabel=${this.searchLabel}
+      .elevationProfile=${this.elevationProfile}
+      .elevationStats=${this.elevationStats}
       @tab-index-changed=${(e:any)=> {
         this.currentTabIdx = e.detail.idx
       }}

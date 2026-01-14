@@ -1,3 +1,4 @@
+import type L from "leaflet";
 import config from "./config";
 
 export class OrsApi {
@@ -16,20 +17,46 @@ export class OrsApi {
     startPoint: L.LatLng,
     endPoint: L.LatLng,
     profile: string = "driving-car"
-  ): Promise<object> {
+  ): Promise<any> {
     const { apiKey, routeServiceUrl } = config;
 
-    const startCoords: string = `${startPoint.lng},${startPoint.lat}`;
-    const endCoords: string = `${endPoint.lng},${endPoint.lat}`;
+    // Correct endpoint for JSON responses (routes[0].geometry is an encoded polyline)
+    const url: string = `${routeServiceUrl}${profile}/json`;
 
-    const url: string = `${routeServiceUrl}${profile}?api_key=${apiKey}&start=${startCoords}&end=${endCoords}`;
+    const body = {
+      coordinates: [
+        [startPoint.lng, startPoint.lat],
+        [endPoint.lng, endPoint.lat]
+      ],
+      elevation: true,
+      // keep geometry dense enough for a smooth chart
+      geometry_simplify: false,
+      // we want segments/steps (distance breakpoints) and ascent/descent
+      instructions: true
+    };
 
-    const json = await fetch(url).then((r) => r.json());
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": apiKey
+      },
+      body: JSON.stringify(body)
+    });
+
+    const json = await response.json();
+
+    if (!response.ok) {
+      // ORS errors usually come with { error: { code, message } }
+      const msg = (json && json.error && json.error.message) ? json.error.message : "Route request failed";
+      throw new Error(msg);
+    }
 
     return json;
   }
 
-  async geocode(searchTerm: string): Promise<string[]> {
+async geocode(searchTerm: string): Promise<string[]> {
     const { apiKey, geocodeServiceUrl } = config;
     const apiUrl = `${geocodeServiceUrl}api_key=${apiKey}&text=${searchTerm}`;
 

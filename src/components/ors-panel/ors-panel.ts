@@ -9,6 +9,8 @@ import { customElement, property, state } from "lit/decorators.js";
 import "../ors-search";
 import "../ors-route-tab";
 import "../ors-place-details";
+import "../elevation-profile";
+import type { ElevationPoint, ElevationStats } from "../../types/elevation";
 
 import { i18n } from "../../i18n";
 
@@ -19,6 +21,10 @@ export class OrsPanel extends LitElement {
   @property({ type: String }) routeStopLabel: string = "";
   @property({ type: String }) searchLabel: string = "";
   @property({ type: Number }) currentTabIdx: number = 0;
+
+  @state() elevationProfile: ElevationPoint[] = [];
+@state() elevationStats?: ElevationStats;
+
   @state() selectedPlace: any = null;
 
   onPlaceSelected(e: any) {
@@ -57,6 +63,7 @@ export class OrsPanel extends LitElement {
   };
 
   render() {
+    console.log(this.elevationProfile, this.elevationStats);
     return html`
       <div style="display:flex; align-items:center; justify-content:space-between;">
         <h4>${i18n.t("title")}</h4>
@@ -92,10 +99,10 @@ export class OrsPanel extends LitElement {
           <ors-search .type=${"search"} .searchTerm=${this.searchLabel} @place-selected=${(e:any)=>this.onPlaceSelected(e)} @clear-place=${()=>{ this.selectedPlace = null; }}> </ors-search>
           ${this.selectedPlace ? html`<ors-place-details .feature=${this.selectedPlace} @clear-place=${()=>{ this.selectedPlace = null; }}></ors-place-details>` : ""}
         </div>
-        <div tab="route-tab"><ors-route-tab .routeStartLabel=${this.routeStartLabel}
-         routeStopLabel=${this.routeStopLabel} ></ors-route-tab></div>
+        <div tab="route-tab"><ors-route-tab .routeStartLabel=${this.routeStartLabel} routeStopLabel=${this.routeStopLabel} .elevationProfile=${this.elevationProfile} .elevationStats=${this.elevationStats}></ors-route-tab></div>
         <div tab="reach-tab">${i18n.t("reach.check")}</div>
       </vaadin-tabsheet>
+      
     `;
   }
 
